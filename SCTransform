@@ -1,0 +1,7 @@
+DefaultAssay(scRNA_harmony)
+scRNA_harmony=scRNA_harmony %>% SCTransform(method="glmGamPoi", verbose = FALSE,vars.to.regress = "CC.Difference",vst.flavor="v2")%>% 
+  RunPCA(npcs = 30, verbose = FALSE)
+scRNA_harmony=  RunUMAP(scRNA_harmony,reduction = "pca", dims = 1:30, verbose = FALSE) %>%
+  FindNeighbors(reduction = "pca", dims = 1:30, verbose = FALSE)
+scRNA_harmony= FindClusters(scRNA_harmony,resolution = 0.2, verbose = FALSE)
+DimPlot(scRNA_harmony,reduction = "umap", group.by = "orig.ident",cols=mycolor[[1]])
