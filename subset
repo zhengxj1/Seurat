@@ -1,0 +1,16 @@
+# Subset Seurat object based on identity class, also see ?SubsetData
+subset(x = pbmc, idents = "B cells")
+subset(x = pbmc, idents = c("CD4 T cells", "CD8 T cells"), invert = TRUE)
+ 
+# Subset on the expression level of a gene/feature
+subset(x = pbmc, subset = MS4A1 > 3)
+ 
+# Subset on a combination of criteria
+subset(x = pbmc, subset = MS4A1 > 3 & PC1 > 5)
+subset(x = pbmc, subset = MS4A1 > 3, idents = "B cells")
+ 
+# Subset on a value in the object meta data
+subset(x = pbmc, subset = orig.ident == "Replicate1")
+ 
+# Downsample the number of cells per identity class
+subset(x = pbmc, downsample = 100)
