@@ -1,0 +1,9 @@
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
+scRNA_harmony=CellCycleScoring(scRNA_harmony, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+scRNA_harmony$CC.Difference <- scRNA_harmony$S.Score -scRNA_harmony$G2M.Score
+RidgePlot(scRNA_harmony, features = c("PCNA", "TOP2A", "MCM6", "MKI67"), ncol = 2)
+
+scRNA_harmony <- ScaleData(scRNA_harmony, vars.to.regress = c("S.Score", "G2M.Score"), features = rownames(scRNA_harmony))
+scRNA_harmony<- ScaleData(scRNA_harmony, vars.to.regress = c("CC.Difference"), features = rownames(scRNA_harmony))
