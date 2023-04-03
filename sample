@@ -1,0 +1,18 @@
+DoHeatmap(subset(sce, downsample = 15), 
+          features = features, size = 3)
+          
+
+
+# 每个细胞亚群抽10 
+allCells=names(Idents(sce))
+allType = levels(Idents(sce))
+
+choose_Cells = unlist(lapply(allType, function(x){
+  cgCells = allCells[Idents(sce)== x ]
+  cg=sample(cgCells,10)
+  cg
+}))
+
+cg_sce = sce[, allCells %in% choose_Cells]
+cg_sce
+as.data.frame(table(Idents(cg_sce)))
