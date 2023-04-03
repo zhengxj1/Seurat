@@ -1,1 +1,68 @@
+library(harmony)
+scRNAlist <- readRDS("scRNAlist.rds")
+scRNA_harmony<- merge(scRNAlist[[1]], y=c(scRNAlist[[2]], scRNAlist[[3]], 
+                                    scRNAlist[[4]], scRNAlist[[5]], scRNAlist[[6]]))
+##PCA降维
+scRNA_harmony <- NormalizeData(scRNA_harmony) %>% FindVariableFeatures() %>% ScaleData() %>% RunPCA(verbose=FALSE)
+table(scRNA_harmony@meta.data$orig.ident)
+##整合
+scRNA_harmony <- RunHarmony(scRNA_harmony, group.by.vars = "orig.ident")
+#降维聚类
+ndim=1:20
+scRNA_harmony <- FindNeighbors(scRNA_harmony, reduction = "harmony", dims = ndim) %>% FindClusters(resolution=0.2)
+scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = ndim)
+scRNA_harmony = RunTSNE(scRNA_harmony,  reduction = "harmony",dims = ndim)
+##作图
+#group_by_cluster
+DimPlot(scRNA_harmony, reduction = "umap", label=T,raster=FALSE)
+DimPlot(scRNA_harmony, reduction = "tsne", label=T) 
 
+#group_by_sample
+DimPlot(scRNA_harmony, reduction = "tsne", group.by='orig.ident') 
+DimPlot(scRNA_harmony, reduction = "umap", group.by='orig.ident') 
+DimPlot(scRNA_harmony, reduction = "umap", label = TRUE,split.by='orig.ident')
+#combinate
+plot_harmony <- plot5+plot6+plot7+plot8
+plot_harmony
+ggsave("plot_harmony.png", plot = plot_harmony, width = 10, height = 8,dpi = 400)
+saveRDS(scRNA_harmony, 'scRNA_harmony.rds')
+
+
+##==seurat整合多样本==##
+scRNAlist <- readRDS("scRNAlist.rds")
+for (i in 1:length(scRNAlist)) {
+  scRNAlist[[i]] <- NormalizeData(scRNAlist[[i]])
+  scRNAlist[[i]] <- FindVariableFeatures(scRNAlist[[i]],selection.method = "vst")
+}
+##以VariableFeatures为基础寻找锚点
+scRNA.anchors <- FindIntegrationAnchors(object.list = scRNAlist)
+
+##利用锚点整合数据，运行时间较长
+scRNA_seurat <- IntegrateData(anchorset = scRNA.anchors)
+dim(scRNA_seurat)
+scRNA_seurat <- ScaleData(scRNA_seurat) %>% RunPCA(verbose=FALSE)
+scRNA_seurat <- RunUMAP(scRNA_seurat, dims = ndim)
+scRNA_seurat <- FindNeighbors(scRNA_seurat, dims = ndim) %>% FindClusters()
+scRNA_seurat <- RunTSNE(scRNA_seurat, dims = ndim)
+##作图
+#group_by_cluster
+plot9 = DimPlot(scRNA_seurat, reduction = "tsne", label=T) 
+plot10 = DimPlot(scRNA_seurat, reduction = "umap", label=T)
+#group_by_sample
+plot11 = DimPlot(scRNA_seurat, reduction = "tsne", group.by='orig.ident') 
+plot12 = DimPlot(scRNA_seurat, reduction = "umap", group.by='orig.ident') 
+plot_seurat <- plot9+plot10+plot11+plot12
+plot_seurat
+ggsave("plot_seurat.png", plot = plot_seurat, width = 10, height = 8,dpi = 400)
+saveRDS(scRNA_seurat, 'scRNA_seurat.rds')
+###以整合数据进行下游分析 
+
+for(group in unique(scRNA_harmony@active.ident)){
+  print(group)
+  grouplist=subset(scRNA_harmony,idents =group)
+  return(group)
+}
+
+Pericyte=subset(scRNA_harmony,idents ="Pericyte")
+
+save(all,file="all.rda")
