@@ -1,0 +1,98 @@
+# Load the PBMC dataset
+pbmc.data <- Read10X(data.dir = "G:/practice/single cell/pbmc3k/filtered_gene_bc_matrices/hg19/")
+# Initialize the Seurat object with the raw (non-normalized data).
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+
+
+###工作目录根据自己的文件夹做一定调整，例如../,./data/
+### 样本列表，利用read_excel
+samples <- read_excel("./metadata/patients_metadata.xlsx", range = cell_cols("A:A")) %>% .$sample_id
+
+### 批量载入标准的cellranger文件，阅读原文获取数据,为了大家运行便利，我们读6个腺癌进来，3正常，3肿瘤
+### 为什么我知道是腺癌请看metadata.excel文件
+### 15:20用于挑选出sample的范围
+### 使用paste0函数进行准确定位到某个文件夹
+### 注意read10X的三联文件，matrix,features,barcodes
+### cellranger为公司返还的一般形式，这里对完全0基础的同学而言是最大的理解障碍
+for (i in seq_along(samples)[15:20]){
+  assign(paste0("scs_data", i), Read10X(data.dir = paste0("./cellranger/", samples[i], "/filtered_feature_bc_matrix")))
+}
+
+### 创建seurat对象，也是创建6个对象
+for (i in seq_along(samples)[15:20]){
+  assign(paste0("seu_obj", i), CreateSeuratObject(counts = eval(parse(text = paste0("scs_data", i))), project = samples[i], min.cells = 3))
+}
+
+### merge一键融合，从15-20个样本
+seu_obj <- merge(seu_obj15, y = c(seu_obj16, seu_obj17, seu_obj18, seu_obj19, seu_obj20), add.cell.ids = samples[15:20], project = "lung")
+
+### 计算线粒体等基因的比例
+seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^MT-", col.name = "pMT")
+seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^HBA|^HBB", col.name = "pHB")
+seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^RPS|^RPL", col.name = "pRP")
+
+qcparams <- c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP")
+for (i in seq_along(qcparams)){
+  print(VlnPlot(object = seu_obj, features = qcparams[i], group.by = "orig.ident", pt.size = 0))
+}
+for (i in seq_along(qcparams)){
+  print(RidgePlot(object = seu_obj, features = qcparams[i], group.by = "orig.ident"))
+}
+### 批量看计算结果，很不错
+VlnPlot(seu_obj, features = c("nFeature_RNA", "nCount_RNA", "pMT"), pt.size = 0, group.by = "orig.ident", ncol = 1, log = T)
+ggsave2("QC.pdf", path = "./result_3v3/", width = 20, height = 20, units = "cm")
+
+
+
+
+rm(list=ls())
+options(stringsAsFactors = F)
+library(Seurat)
+# Load data 
+dir='./'
+Sys.time()
+raw.data <- read.csv(paste(dir,"Data_input/csv_files/S01_datafinal.csv", sep=""), header=T, row.names = 1)
+Sys.time()
+dim(raw.data)
+raw.data[1:4,1:4]
+head(colnames(raw.data)) 
+# Load metadata 
+metadata <- read.csv(paste(dir,"Data_input/csv_files/S01_metacells.csv", sep=""), row.names=1, header=T)
+head(metadata) 
+# Find ERCC's, compute the percent ERCC, and drop them from the raw data.
+erccs <- grep(pattern = "^ERCC-", x = rownames(x = raw.data), value = TRUE)
+percent.ercc <- Matrix::colSums(raw.data[erccs, ])/Matrix::colSums(raw.data)
+fivenum(percent.ercc)
+ercc.index <- grep(pattern = "^ERCC-", x = rownames(x = raw.data), value = FALSE)
+raw.data <- raw.data[-ercc.index,]
+dim(raw.data)
+# Create the Seurat object with all the data (unfiltered)
+main_tiss <- CreateSeuratObject(counts = raw.data)
+# add rownames to metadta 
+row.names(metadata) <- metadata$cell_id
+# add metadata to Seurat object 
+main_tiss <- AddMetaData(object = main_tiss, metadata = metadata)
+main_tiss <- AddMetaData(object = main_tiss, percent.ercc, col.name = "percent.ercc")
+# Head to check
+head(main_tiss@meta.data)
+# Calculate percent ribosomal genes and add to metadata
+ribo.genes <- grep(pattern = "^RP[SL][[:digit:]]", x = rownames(x = main_tiss@assays$RNA@data), value = TRUE)
+percent.ribo <- Matrix::colSums(main_tiss@assays$RNA@counts[ribo.genes, ])/Matrix::colSums(main_tiss@assays$RNA@data)
+fivenum(percent.ribo)
+main_tiss <- AddMetaData(object = main_tiss, metadata = percent.ribo, col.name = "percent.ribo")
+main_tiss
+# Filter cells so that remaining cells have nGenes >= 500 and nReads >= 50000
+main_tiss_filtered <- subset(x=main_tiss, subset = nCount_RNA > 50000 & nFeature_RNA > 500)
+main_tiss_filtered
+
+
+
+
+
+
+
+
+
+
+
+
