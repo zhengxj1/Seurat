@@ -1,0 +1,41 @@
+
+##安装生存分析R包
+BiocManager::install(c("survival","survminer"), update = F)
+##读取HNSC数据集的表达矩阵和临床信息
+library(survival)
+library(survminer)
+library(tidyverse)
+dir.create("Survival")
+TCGAexpr <- read.delim("Data/TCGA-HNSC.htseq_fpkm.tsv", check.names=F)
+id.annota <- read.delim("Data/gencode.v22.annotation.gene.probeMap", check.names=F)
+id.annota <- id.annota[, 1:2]
+TCGAexpr <- merge(id.annota, TCGAexpr, by.x="id", by.y="Ensembl_ID")
+TCGAexpr <- aggregate(TCGAexpr[,-c(1,2)], list(TCGAexpr$gene), FUN=sum)
+TCGAexpr <- column_to_rownames(TCGAexpr,"Group.1")
+#过滤表达量过低的基因，减少分析数据量
+TCGAexpr <- TCGAexpr[rowSums(TCGAexpr)>10, ] %>% as.matrix()
+TCGAclin <- read.delim("Data/TCGA-HNSC.survival.tsv", check.names = F)
+TCGAclin <- TCGAclin[TCGAclin$sample %in% names(TCGAexpr),]
+TCGAclin <- TCGAclin[,-3]
+
+
+TFHset = list(c('PDCD1', 'CXCL13', 'TIGIT', 'TOX', 'MAF', 'CXCR5', 'CD40LG', 'IL6ST'))
+names(TFHset) <- 'TFHset'
+ES <- gsva(TCGAexpr, TFHset)
+
+ES <- data.frame(t(ES), check.names=F)
+TCGAclin <- merge(TCGAclin, ES, by.x="sample", by.y=0)
+TCGAclin$TFH.set = ifelse(TCGAclin$TFHset>median(TCGAclin$TFHset),'high','low')
+png('Survival/survival.png', 800, 600)
+ggsurvplot(survfit(Surv(OS.time, OS)~TFH.set, data=TCGAclin), conf.int=F, pval=TRUE)
+dev.off()
+write.csv(TCGAclin, 'Survival/TCGAclin.csv', row.names = F)
+
+res.cox <- coxph(Surv(OS.time, OS)~TFHset, data=TCGAclin)
+res.cox
+# Call:
+# coxph(formula = Surv(OS.time, OS) ~ TFHset, data = TCGAclin)
+
+
+
+
