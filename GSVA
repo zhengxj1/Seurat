@@ -1,0 +1,56 @@
+
+#从bioconductor安装
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GSVA")
+#或者从github安装
+library(devtools)
+install_github("rcastelo/GSVA")
+
+
+library(Seurat)
+library(GSVA)
+library(tidyverse)
+##创建gmt文件转list函数
+gmt2list <- function(gmtfile){
+ sets <- as.list(read_lines(gmtfile))
+ for(i in 1:length(sets)){
+    tmp = str_split(sets[[i]], '\t')
+  n = length(tmp[[1]])
+  names(sets)[i] = tmp[[1]][1]
+  sets[[i]] = tmp[[1]][3:n]
+  rm(tmp, n)
+ }
+ return(sets)
+}
+#读取基因集数据库
+s.sets = gmt2list("GSEA/input/c2.cp.kegg.v7.1.symbols.gmt")
+#读取表达矩阵
+scRNA <- readRDS("scRNA.rds")
+# 随机提取1000个细胞演示GSVA，非常规操作
+# tmp <- sample(colnames(scRNA),1000) %>% sort()
+# scRNA <- scRNA[,tmp]
+expr <- as.matrix(scRNA@assays$RNA@counts)
+meta <- scRNA@meta.data[,c("seurat_clusters", "celltype_Monaco")]
+es.matrix = gsva(expr, s.sets, kcdf="Poisson")
+write.table(es.matrix, 'GSVA/gsva.xls', row.names=T, col.names=NA, sep='\t')
+
+library(pheatmap)
+library(patchwork)
+#绘制热图
+pheatmap(es.matrix, show_rownames=1, show_colnames=0, annotation_col=meta,
+         fontsize_row=5, filename='GSVA/gsva_demo.png', width=15, height=12)
+#挑选感兴趣的基因集绘制featureplot
+es <- data.frame(t(es.matrix),stringsAsFactors=F)
+scRNA <- AddMetaData(scRNA, es)
+p1 <- FeaturePlot(scRNA, features = "KEGG_PRIMARY_BILE_ACID_BIOSYNTHESIS", reduction = 'tsne')
+p2 <- FeaturePlot(scRNA, features = "KEGG_ETHER_LIPID_METABOLISM", reduction = 'tsne')
+p3 <- FeaturePlot(scRNA, features = "KEGG_RIBOSOME", reduction = 'tsne')
+p4 <- FeaturePlot(scRNA, features = "KEGG_ASTHMA", reduction = 'tsne')
+plotc = (p1|p2)/(p3|p4)
+ggsave('GSVA/featureplot_demo.png', plotc, width = 10, height = 8)
+
+
+
+
+
