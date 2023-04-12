@@ -1,0 +1,50 @@
+library(UCell)
+library(irGSEA)
+
+scRNA_harmony.halk <- irGSEA.score(object = scRNA_harmony, assay = "RNA",
+                             slot = "data", seeds = 123, ncores = 1,
+                             min.cells = 3, min.feature = 0,
+                             custom = F, geneset = NULL, msigdb = T,
+                             species = "Homo sapiens", category = "H",  
+                             subcategory = NULL, geneid = "symbol",
+                             method = c("AUCell", "UCell", "singscore",
+                                        "ssgsea"),
+                             aucell.MaxRank = NULL, ucell.MaxRank = NULL,
+                             kcdf = 'Gaussian')
+ result.dge <- irGSEA.integrate(object = pbmc3k.final,
+                               group.by = "seurat_annotations",
+                               metadata = NULL, col.name = NULL,
+                               method = c("AUCell","UCell","singscore",
+                                          "ssgsea"))
+irGSEA.heatmap.plot <- irGSEA.heatmap(object = result.dge,
+                                      method = "RRA",
+                                      top = 50,
+                                      show.geneset = NULL)
+irGSEA.heatmap.plot
+
+irGSEA.bubble.plot <- irGSEA.bubble(object = result.dge,
+                                    method = "RRA",
+                                    top = 50)
+irGSEA.bubble.plot
+
+irGSEA.upset.plot <- irGSEA.upset(object = result.dge,
+                                  method = "RRA")
+
+irGSEA.barplot.plot <- irGSEA.barplot(object = result.dge,
+                                      method = c("AUCell", "UCell", "singscore",
+                                                 "ssgsea"))
+                                                 
+                                                 
+scatterplot <- irGSEA.density.scatterplot(object = pbmc3k.final,
+                             method = "UCell",
+                             show.geneset = "HALLMARK-INFLAMMATORY-RESPONSE",
+                             reduction = "umap")                                                 
+halfvlnplot <- irGSEA.halfvlnplot(object = pbmc3k.final,
+                                  method = "UCell",
+                                  show.geneset = "HALLMARK-INFLAMMATORY-RESPONSE")                                                 
+                                                 
+ densityheatmap <- irGSEA.densityheatmap(object = pbmc3k.final,
+                                        method = "UCell",
+                                        show.geneset = "HALLMARK-INFLAMMATORY-RESPONSE")                                                
+                                                 
+                                                 
