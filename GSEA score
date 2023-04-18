@@ -11,11 +11,10 @@ scRNA_harmony.halk <- irGSEA.score(object = scRNA_harmony, assay = "RNA",
                                         "ssgsea"),
                              aucell.MaxRank = NULL, ucell.MaxRank = NULL,
                              kcdf = 'Gaussian')
- result.dge <- irGSEA.integrate(object = pbmc3k.final,
+ result.dge <- irGSEA.integrate(object = scRNA_harmony,
                                group.by = "seurat_annotations",
                                metadata = NULL, col.name = NULL,
-                               method = c("AUCell","UCell","singscore",
-                                          "ssgsea"))
+                               method = c("AUCell")
 irGSEA.heatmap.plot <- irGSEA.heatmap(object = result.dge,
                                       method = "RRA",
                                       top = 50,
