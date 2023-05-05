@@ -1,0 +1,22 @@
+genes_to_check =list(
+  Mac=Mac,
+  pDC=pDC,
+  DC1=DC1, 
+  DC2=DC2,
+  DC3=DC3 ,
+  Mono=Mono
+)
+genes_to_check = lapply(genes_to_check, str_to_upper)
+DotPlot(scRNA_harmony , 
+        features = genes_to_check,
+        scale = T,assay='RNA' )+
+  theme_bw()+
+  scale_color_gradient2(low="#498EA4",high =  "#E54924",mid="grey")+
+  theme(legend.position = "right",legend.box = "vertical",
+        legend.margin=margin(t= 0, unit='cm'),
+        #legend.spacing = unit(0,"in"),
+        axis.text.x  = element_text(color="black",size=12,angle = 45,vjust = 0.5, hjust=0.5),
+        axis.text.y  = element_text(color="black",size=12),
+        legend.text = element_text(size =12,color="black"),
+        legend.title = element_text(size =12,color="black")
+  ) 
