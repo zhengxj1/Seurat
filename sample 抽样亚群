@@ -1,0 +1,1 @@
+SeuratObject=subset(SeuratObject, cells = sample(colnames(SeuratObject), size = 100, replace = TRUE))
