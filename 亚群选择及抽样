@@ -1,0 +1,22 @@
+# Merge two Seurat objects合并
+merge(x = pbmc1, y = pbmc2)
+# Merge more than two Seurat objects
+merge(x = pbmc1, y = list(pbmc2, pbmc3))
+
+# 数据访问
+pbmc[[c("percent.mito", "nFeature_RNA")]]
+
+
+SeuratObject=subset(SeuratObject, cells = sample(colnames(SeuratObject), size = 100, replace = FALSE))
+
+
+scRNA_harmony=subset(scRNA_harmony,idents = c(0:8))
+subset(x = pbmc, subset = MS4A1 > 3)
+subset(x = pbmc, subset = MS4A1 > 3, idents = "B cells")
+subset(x = pbmc, subset = orig.ident == "Replicate1"
+
+
+
+
+
+
