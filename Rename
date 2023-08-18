@@ -14,3 +14,12 @@ pbmc <- RenameIdents(object = scRNA_harmony, `CD4 T cells` = "T Helper cells")
 scRNA_harmony$CellType <- Idents(scRNA_harmony)
 Idents(scRNA_harmony) <- "replicate"
 Idents(scRNA_harmony) <- "CellType"
+
+cd4_sce = sce[,Idents(sce)== "CD4 T"]
+mono_sce = sce[,Idents(sce)== "Mono"]
+
+sce$celltype = as.character(Idents(sce))
+table(sce$celltype )
+mono_sce$celltype = ifelse(mono_sce@assays$RNA@counts['CD14',]>1,'pos','neg')
+sce$celltype[match(colnames(mono_sce),colnames(sce))] =  mono_sce$celltype 
+table(sce$celltype)
