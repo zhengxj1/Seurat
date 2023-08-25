@@ -23,3 +23,6 @@ table(sce$celltype )
 mono_sce$celltype = ifelse(mono_sce@assays$RNA@counts['CD14',]>1,'pos','neg')
 sce$celltype[match(colnames(mono_sce),colnames(sce))] =  mono_sce$celltype 
 table(sce$celltype)
+
+
+celltype=data.frame(
