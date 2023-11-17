@@ -1,0 +1,6 @@
+1. merge
+pbmc.big <- merge(pbmc3k, y = c(pbmc4k, pbmc8k), add.cell.ids = c("3K", "4K", "8K"), project = "PBMC15K")
+sce.all=merge(x=sceList[[1]],
+              y=sceList[ -1 ],
+              add.cell.ids =  gsub('^GSM[0-9]*_','',samples))}
+
