@@ -26,3 +26,5 @@ table(sce$celltype)
 
 
 celltype=data.frame(
+
+label_names <- read.csv(file.path(dataset_loc, 'Rename_name.csv'), header=T)
