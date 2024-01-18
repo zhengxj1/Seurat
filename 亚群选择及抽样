@@ -15,8 +15,8 @@ subset(x = pbmc, subset = MS4A1 > 3)
 subset(x = pbmc, subset = MS4A1 > 3, idents = "B cells")
 subset(x = pbmc, subset = orig.ident == "Replicate1"
 
-
-
+##分割对象
+scedata=SplitObject(scRNA_harmony,split.by="celltypes")
 
 
 
