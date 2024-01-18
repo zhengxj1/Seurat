@@ -1,0 +1,23 @@
+####CIBERSORTx####
+library(Seurat)
+library(data.table)
+CIBERSORTx=function(seuratObj){
+  #从Seurat对象中制作单细胞表达矩阵（行为基因，列为细胞）
+  set.seed(123456)
+  Idents(seuratObj)=seuratObj$celltypes
+  seuratObj=subset(seuratObj, downsample = 1700)
+  print(dim(seuratObj))
+  exp_matrix = seuratObj@assays$RNA@counts#表达矩阵
+  metadata = seuratObj@meta.data#metadata
+  identical(row.names(seuratObj@meta.data),colnames(exp_matrix))#TRUE
+  exp_matrix = exp_matrix %>% as.data.frame() %>% 
+    rownames_to_column(var = "GeneSymbol") %>%
+    dplyr::select(GeneSymbol,everything())
+  exp_matrix[1:3,1:12]
+  colnames(exp_matrix)[-1] = seuratObj$celltypes
+  fwrite(exp_matrix, "./Step1.CibersortX_scRNAassay.txt",sep = "\t",row.names = F)
+  }
+CIBERSORTx(scRNA_harmony)
+
+write.table(TARGET, "TARGET.txt",sep = "\t",
+            row.names = TRUE, col.names = NA)
