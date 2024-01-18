@@ -14,10 +14,7 @@ CIBERSORTx=function(seuratObj){
     rownames_to_column(var = "GeneSymbol") %>%
     dplyr::select(GeneSymbol,everything())
   exp_matrix[1:3,1:12]
-  colnames(exp_matrix)[-1] = seuratObj$celltypes
-  fwrite(exp_matrix, "./Step1.CibersortX_scRNAassay.txt",sep = "\t",row.names = T)
-  }
+  colnames(exp_matrix)[-1] = as.character(seuratObj$celltypes)
+  fwrite(exp_matrix, "./Step1.CibersortX_scRNAassay.txt",sep = "\t",row.names =F)
+}
 CIBERSORTx(scRNA_harmony)
-
-write.table(TARGET, "TARGET.txt",sep = "\t",
-            row.names = TRUE, col.names = NA)
