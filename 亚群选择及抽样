@@ -24,5 +24,8 @@ for (i in names(scedata)) {
 }
 
 
-
+scRNA_harmony=subset(scRNA_harmony,idents = c("OS","MSC","Myeloid","TNK","Endothelial",
+                                              "OC","B_cell","Myocyte","Plasma"))
+scRNA_harmony$celltypes=factor(scRNA_harmony$celltypes,levels =c("OS","MSC","Myeloid","TNK","Endothelial",
+                                                                 "OC","B_cell","Myocyte","Plasma") )
 
