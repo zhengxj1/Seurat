@@ -9,7 +9,7 @@ pbmc[[c("percent.mito", "nFeature_RNA")]]
 
 SeuratObject=subset(SeuratObject, cells = sample(colnames(SeuratObject), size = 100, replace = FALSE))
 
-
+MSC=subset(MSC,subset=celltypes!="Endothelial")
 scRNA_harmony=subset(scRNA_harmony,idents = c(0:8))
 subset(x = pbmc, subset = MS4A1 > 3)
 subset(x = pbmc, subset = MS4A1 > 3, idents = "B cells")
