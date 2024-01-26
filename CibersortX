@@ -1,4 +1,5 @@
 ####CIBERSORTx####
+####CIBERSORTx####
 library(Seurat)
 library(data.table)
 CIBERSORTx=function(seuratObj){
@@ -18,3 +19,63 @@ CIBERSORTx=function(seuratObj){
   fwrite(exp_matrix, "./Step1.CibersortX_scRNAassay.txt",sep = "\t",row.names =F)
 }
 CIBERSORTx(scRNA_harmony)
+
+####boxplot####
+dir.create("Cibersortx")
+TME_data <- read.csv("CIBERSORTx_Results.csv",header = T,row.names = 1)
+TME_data = TME_data[,c(1:c(ncol(TME_data)-3))]
+
+# 5.1 数据粗处理
+TME_New = TME_data
+TME_New$group <- "T"
+TME_New$sample <- row.names(TME_New)
+# 5.2 融合数据
+TME_New = reshape2::melt(TME_New)
+colnames(TME_New)=c("Group","Sample","Celltype","Composition") #设置行名
+plot_order = TME_New %>% 
+  group_by(Celltype) %>% 
+  summarise(m = median(Composition)) %>% 
+  arrange(desc(m)) %>% 
+  pull(Celltype)
+plot_order
+
+TME_New$Celltype = factor(TME_New$Celltype,levels = plot_order)
+
+ggplot(TME_New,aes(x=Celltype,y=Composition)) + #ggplot作图
+  geom_boxplot(aes(color=Celltype))+
+  geom_jitter(aes(color=Celltype),size=2,width = 0.3,height = 0.1,alpha=0.8,fill="transparent")+
+  scale_color_manual(values = Cat_Col)+ xlab("")+ylab("Percent")+labs(title = "TARGET") + theme_CNS_blank(base_size = 8)
+ggsave("Cibersortx/boxplot.pdf",width=5,height=5)
+####corrplot####
+library(corrplot)
+corda.cell.type <- psych::corr.test(TME_data, TME_data, method = "sp")
+r.df = as.matrix(corda.cell.type$r)
+p.df = as.matrix(corda.cell.type$p.adj)
+
+pdf(file="./Cibersortx/corrplot.pdf",width =3.5,height =3)
+corrplot(as.matrix(r.df),
+         method = "color",
+         col=rev(COL2("RdBu", 200)),
+         type = c("upper"),
+         p.mat = p.df,#是否添加了P值，如果是NULL，则sig.level到pch.cex参数无效
+         sig.level = 0.05,#P值检验水平设置
+         insig = c("label_sig"),
+         pch.cex = 1, 
+         tl.col = "black",
+         tl.cex = 0.8,#文本标签的大小
+         na.label = "",#NA值如何表示
+         na.label.col = "#bcb9b5",#表示NA值符号的颜色
+)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
