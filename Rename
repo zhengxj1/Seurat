@@ -37,3 +37,21 @@ table(sce$celltype)
 celltype=data.frame(
 
 label_names <- read.csv(file.path(dataset_loc, 'Rename_name.csv'), header=T)
+
+###细胞重命名
+pbmc_small <- RenameCells(object = pbmc_small, add.cell.id = "A")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
