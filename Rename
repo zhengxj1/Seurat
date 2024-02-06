@@ -41,7 +41,8 @@ label_names <- read.csv(file.path(dataset_loc, 'Rename_name.csv'), header=T)
 ###细胞重命名
 pbmc_small <- RenameCells(object = pbmc_small, add.cell.id = "A")
 
-
+新的metadata
+metadata$library_id <- paste(metadata$cancer,metadata$patient, metadata$tissue,  sep="-")
 
 
 
