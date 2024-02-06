@@ -1,0 +1,4 @@
+读取CSV
+#读取CSV文件
+data <-read.csv("data.csv",row.names = 1)
+pbmc <- CreateSeuratObject(counts = data)
