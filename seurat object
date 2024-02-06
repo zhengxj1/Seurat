@@ -2,3 +2,12 @@
 #读取CSV文件
 data <-read.csv("data.csv",row.names = 1)
 pbmc <- CreateSeuratObject(counts = data)
+
+读取三文件
+barcodes.path <- "GSE212890_NK.barcodes.csv.gz"
+genes.path <- "GSE212890_NK.genes.csv.gz"
+matrix.path <- "GSE212890_NK_counts.mtx.gz"
+# 读取数据
+data <- Read10X(data.dir = "", barcode.file = barcodes.path, features.file = genes.path, matrix.file = matrix.path)
+# 创建Seurat对象
+sce<- CreateSeuratObject(counts = data, project = "GSE212890_NK")
