@@ -3,11 +3,17 @@
 data <-read.csv("data.csv",row.names = 1)
 pbmc <- CreateSeuratObject(counts = data)
 
-读取三文件
-barcodes.path <- "GSE212890_NK.barcodes.csv.gz"
-genes.path <- "GSE212890_NK.genes.csv.gz"
-matrix.path <- "GSE212890_NK_counts.mtx.gz"
-# 读取数据
-data <- Read10X(data.dir = "", barcode.file = barcodes.path, features.file = genes.path, matrix.file = matrix.path)
-# 创建Seurat对象
-sce<- CreateSeuratObject(counts = data, project = "GSE212890_NK")
+csv转tsv.gz
+library(Matrix)
+matrix <- readMM(file = "matrix.mtx.gz")
+
+# 读取features.tsv文件（或genes.tsv）
+features <- read.csv("NK_rawcount.genes.csv", header = FALSE, row.names = 1)
+# 读取barcodes.tsv文件
+barcodes <- read.csv("NK_rawcount.barcodes.csv", header = FALSE, row.names = 1)
+
+matrix <- t(as(matrix, "sparseMatrix"))
+matrix[1:5,1:5]
+colnames(matrix) <- barcodes[,1]
+rownames(matrix) <- features[,1]
+sce <- CreateSeuratObject(counts = matrix)
