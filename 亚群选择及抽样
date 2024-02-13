@@ -29,3 +29,20 @@ scRNA_harmony=subset(scRNA_harmony,idents = c("OS","MSC","Myeloid","TNK","Endoth
 scRNA_harmony$celltypes=factor(scRNA_harmony$celltypes,levels =c("OS","MSC","Myeloid","TNK","Endothelial",
                                                                  "OC","B_cell","Myocyte","Plasma","Others") )
 
+set_celltypes_levels <- function(data_frame, column_name, levels_vector) {
+  data_frame[[column_name]] <- factor(data_frame[[column_name]], levels = levels_vector)
+  return(data_frame)
+}
+levels_vector <- c("OS", "MSC", "Myeloid", "TNK", "Endothelial",
+                   "OC", "B_cell", "Myocyte", "Plasma", "Others")
+scRNA_harmony <- set_celltypes_levels(scRNA_harmony, "celltypes", levels_vector)
+
+
+添加metadata
+# 筛选出 orig.ident 为 'BS9' 的细胞
+bs9_cells <- WhichCells(scRNA_harmony, expression = orig.ident == 'BS9')
+# 更新这些细胞的 Treatment 列为 'Post-chemotherapy'
+seurat_obj <- AddMetaData(scRNA_harmony, metadata = rep('Post-chemotherapy', length(bs9_cells)), col.name = 'Treatment', cells = bs9_cells)
+
+
+
