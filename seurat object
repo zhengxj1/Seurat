@@ -17,3 +17,39 @@ matrix[1:5,1:5]
 colnames(matrix) <- barcodes[,1]
 rownames(matrix) <- features[,1]
 sce <- CreateSeuratObject(counts = matrix)
+
+
+两个seurat去重 取交集
+mergeSeuratObjectsCommonCells <- function(seuratObj1, seuratObj2) {
+  cells1 <- colnames(seuratObj1)
+  cells2 <- colnames(seuratObj2)
+  commonCells <- intersect(cells1, cells2)
+  uniqueCells1 <- setdiff(cells1, commonCells)
+  seuratObj1_unique <- subset(seuratObj1, cells = uniqueCells1)
+  mergedSeuratObj <- merge(seuratObj1_unique, y = seuratObj2)
+  return(mergedSeuratObj)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
