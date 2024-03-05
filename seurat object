@@ -31,8 +31,13 @@ mergeSeuratObjectsCommonCells <- function(seuratObj1, seuratObj2) {
 }
 
 
-
-
+##删除部分基因
+matrix=scRNA_harmony@assays$RNA@counts
+rows_to_keep <- !(row.names(matrix) %in% hvg)
+meta=scRNA_harmony@meta.data
+mat=matrix[rows_to_keep,]
+scRNA_harmony=CreateSeuratObject(mat)
+scRNA_harmony=AddMetaData(scRNA_harmony,metadata = meta)
 
 
 
